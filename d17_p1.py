@@ -30,7 +30,7 @@ def check_velocity(vel):
         vy -= 1
 
 
-ampl = max(abs(xmin), abs(xmax), abs(ymin), abs(ymax)) // 2
+ampl = max(abs(xmin), abs(xmax), abs(ymin), abs(ymax)) + 1
 
 checks = (check_velocity(vel) for vel in product(range(ampl), range(ampl)))
 topy = max(y for check, y in checks if check)
