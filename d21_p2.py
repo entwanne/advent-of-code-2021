@@ -1,29 +1,30 @@
 import sys
 from collections import Counter
 from itertools import cycle, product
+from functools import cache
 
 
-players = tuple(int(line.strip().split(': ')[1]) - 1 for line in sys.stdin)
-scores = tuple(0 for _ in players)
-
-univers = Counter([(players, scores, 0)])
-winners = Counter()
+p1, p2 = tuple(int(line.strip().split(': ')[1]) - 1 for line in sys.stdin)
 
 rolls = Counter(sum(r) for r in product((1, 2, 3), repeat=3))
 
-while univers:
-    (players, scores, p), n = univers.popitem()
-    np = (p + 1) % len(players)
+
+@cache
+def get_winners(p1, p2, s1=0, s2=0):
+    w1, w2 = 0, 0
 
     for r, count in rolls.items():
-        pos = (players[p] + r) % 10
-        players_ = list(players)
-        scores_ = list(scores)
-        players_[p] = pos
-        scores_[p] += pos + 1
-        if scores_[p] >= 21:
-            winners[p] += n * count
-        else:
-            univers[tuple(players_), tuple(scores_), np] += n * count
+        pos = (p1 + r) % 10
+        score = s1 + pos + 1
 
-print(max(winners.values()))
+        if score >= 21:
+            w1 += count
+        else:
+            w2_, w1_ = get_winners(p2, pos, s2, score)
+            w1 += count * w1_
+            w2 += count * w2_
+
+    return w1, w2
+
+
+print(max(get_winners(p1, p2)))
